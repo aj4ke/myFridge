@@ -37,7 +37,38 @@ struct OCRServiceTests {
 
     @Test func handlesEmptyInput() {
         #expect(OCRService.rows(from: []).isEmpty)
+        #expect(OCRService.readingOrder([]).isEmpty)
         #expect(OCRService.bestCandidate(among: []) == nil)
+    }
+
+    func paragraph(_ lines: [String], x: CGFloat, top: CGFloat, bottom: CGFloat) -> OCRService.ParagraphBox {
+        OCRService.ParagraphBox(lines: lines, rect: CGRect(x: x, y: bottom, width: 0.1, height: top - bottom))
+    }
+
+    /** Positions and order from an iPhone reading amazon_screenshot1: the left column first, then the logo and prices. */
+    @Test func readsColumnsBackIntoRows() {
+        let phoneOrder = [
+            paragraph(["Purchased at Whole Foods Market -"], x: 0.050, top: 0.808, bottom: 0.788),
+            paragraph(["Cambridge"], x: 0.050, top: 0.775, bottom: 0.750),
+            paragraph(["Items in your order"], x: 0.050, top: 0.648, bottom: 0.627),
+            paragraph(["365 by Whole Foods Market, Organic", "Whole Milk, 64 oz"], x: 0.205, top: 0.594, bottom: 0.550),
+            paragraph(["Qty: 1@$4.39 each"], x: 0.208, top: 0.546, bottom: 0.525),
+            paragraph(["WHOLE", "FOODS"], x: 0.806, top: 0.809, bottom: 0.760),
+            paragraph(["MARKET"], x: 0.826, top: 0.765, bottom: 0.752),
+            paragraph(["$4.39"], x: 0.857, top: 0.597, bottom: 0.574),
+        ]
+        let ordered = OCRService.readingOrder(phoneOrder)
+        #expect(ordered == [
+            ["Purchased at Whole Foods Market -"],
+            ["WHOLE", "FOODS"],
+            ["Cambridge"],
+            ["MARKET"],
+            ["Items in your order"],
+            ["365 by Whole Foods Market, Organic", "Whole Milk, 64 oz"],
+            ["$4.39"],
+            ["Qty: 1@$4.39 each"],
+        ])
+        #expect(ReceiptLineFilter.screenshotItems(from: ordered) == ["365 by Whole Foods Market, Organic Whole Milk, 64 oz | Qty: 1@$4.39 each"])
     }
 
     @Test func prefersLaterCandidateThatKeepsTheWeight() {

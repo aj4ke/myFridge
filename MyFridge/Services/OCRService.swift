@@ -39,13 +39,35 @@ nonisolated enum OCRService {
             guard let cgImage = image.cgImage else { continue }
             let request = RecognizeDocumentsRequest()
             let observations = try await request.perform(on: cgImage, orientation: CGImagePropertyOrientation(image.imageOrientation))
+            var boxes: [ParagraphBox] = []
             for observation in observations {
-                paragraphs += observation.document.paragraphs.map { paragraph in
-                    paragraph.lines.compactMap { bestCandidate(among: $0.topCandidates(3).map(\.string)) }
+                boxes += observation.document.paragraphs.map { paragraph in
+                    ParagraphBox(
+                        lines: paragraph.lines.compactMap { bestCandidate(among: $0.topCandidates(3).map(\.string)) },
+                        rect: paragraph.boundingRegion.boundingBox.cgRect
+                    )
                 }
             }
+            paragraphs += readingOrder(boxes)
         }
         return paragraphs
+    }
+
+    /**
+     * On iPhone, Vision reads a whole column before the next, which puts the store logo after the items.
+     * Paragraphs whose tops are within half a line share a row and read left to right, like rows(from:).
+     */
+    static func readingOrder(_ paragraphs: [ParagraphBox]) -> [[String]] {
+        var rows: [[ParagraphBox]] = []
+        for paragraph in paragraphs.sorted(by: { $0.rect.maxY > $1.rect.maxY }) {
+            if let anchor = rows.last?.first,
+               anchor.rect.maxY - paragraph.rect.maxY < min(anchor.lineHeight, paragraph.lineHeight) / 2 {
+                rows[rows.count - 1].append(paragraph)
+            } else {
+                rows.append([paragraph])
+            }
+        }
+        return rows.flatMap { $0.sorted { $0.rect.minX < $1.rect.minX } }.map(\.lines)
     }
 
     /** The first guess for a per-pound Qty line can drop the weight ("Qty: @$6.99/lb") while a later guess keeps it. */
@@ -61,6 +83,16 @@ nonisolated enum OCRService {
     struct TextBox {
         let text: String
         let rect: CGRect
+    }
+
+    /** Same coordinates as TextBox. */
+    struct ParagraphBox {
+        let lines: [String]
+        let rect: CGRect
+
+        var lineHeight: CGFloat {
+            rect.height / CGFloat(max(lines.count, 1))
+        }
     }
 
     /** Boxes whose centers are within half a line height share a row. */
