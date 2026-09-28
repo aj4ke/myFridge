@@ -11,6 +11,9 @@ struct WeightExtractorTests {
         ("Qty: 0.75 1b @ $6.99/lb", 0.75, .pounds),
         ("BNLS SKNLS CHKN BRST 8.47 F | 1.52 lb @ 5.57 /lb", 1.52, .pounds),
         ("Qty: 12 oz @ $0.50/oz", 0.75, .ounces),
+        ("Qty: 8oz@$1.00/oz", 0.5, .ounces),
+        ("Qty: 2 lb @ $3.99/lb", 2, .pounds),
+        ("ORG BANANAS | 2.30 LB @ 0.79 /LB", 2.3, .pounds),
     ])
     func findsWeight(_ line: String, pounds: Double, unit: WeightUnit) throws {
         let weight = try #require(WeightExtractor.weight(in: line))
@@ -25,6 +28,8 @@ struct WeightExtractorTests {
         "Checkout Bag Charge | Qty: 2@$0.10 each",
         "ORG STRAWBERRIES 4.99 F",
         "2 @ 1.29",
+        "Organic Strawberries, 1 lb",
+        "Qty: @$6.99/lb",
     ])
     func ignoresLinesWithoutWeight(_ line: String) {
         #expect(WeightExtractor.weight(in: line) == nil)

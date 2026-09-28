@@ -39,8 +39,22 @@ struct FixtureTests {
         }
     }
 
+    /** Mirrors ImportService: an item's line number finds its weight in the filtered lines. */
+    @Test func weightStaysWithItsItemThroughFallbackParse() async throws {
+        let lines = ReceiptLineFilter.screenshotItems(from: paragraphs(from: try fixtureLines("amazon_screenshot2_raw")))
+        let items = try await FallbackParser().parse(lines: lines, source: .screenshot).items
+        let weighed = items.compactMap { item in
+            WeightExtractor.weight(in: lines[item.line - 1]).map { (name: item.name, pounds: $0.pounds) }
+        }
+        #expect(items.count == 8)
+        #expect(weighed.map(\.name) == ["Bell & Evans, Boneless Skinless Chicken Thighs"])
+        #expect(weighed.map(\.pounds) == [1.98])
+    }
+
+    /** Otherwise the parameterized tests above would silently run zero cases. */
     @Test func fixturesAreBundled() {
         #expect(!textFixtureNames().isEmpty)
+        #expect(!imageFixtureNames().isEmpty)
     }
 }
 

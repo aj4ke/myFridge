@@ -2,13 +2,6 @@ import Foundation
 import Testing
 @testable import MyFridge
 
-/** Uses a throwaway UserDefaults suite so tests don't touch the app's saved values. */
-func withTemporaryMemory(_ body: (ShelfLifeMemory) async throws -> Void) async rethrows {
-    let suiteName = "MyFridgeTests.\(UUID().uuidString)"
-    defer { UserDefaults.standard.removePersistentDomain(forName: suiteName) }
-    try await body(ShelfLifeMemory(suiteName: suiteName))
-}
-
 struct ShelfLifeMemoryTests {
     @Test func remembersByCleanedUpName() async {
         await withTemporaryMemory { memory in
@@ -23,6 +16,15 @@ struct ShelfLifeMemoryTests {
             memory.remember(50, for: "Milk")
             memory.remember(10, for: "Milk")
             #expect(memory.days(for: "Milk") == 10)
+        }
+    }
+
+    @Test func keepsEachNameSeparately() async {
+        await withTemporaryMemory { memory in
+            memory.remember(50, for: "Milk")
+            memory.remember(9, for: "Jalapeño Peppers")
+            #expect(memory.days(for: "Milk") == 50)
+            #expect(memory.days(for: "JALAPENO PEPPERS") == 9)
         }
     }
 }

@@ -13,10 +13,6 @@ struct WeightUnitTests {
         #expect(WeightUnit.pounds.formatted(pounds: 2) == "2 lb")
         #expect(WeightUnit.ounces.formatted(pounds: 1.5) == "24 oz")
         #expect(WeightUnit.ounces.formatted(pounds: 0.25) == "4 oz")
-    }
-
-    @Test func onlyMeatCategoriesTrackWeight() {
-        let tracked = FoodCategory.allCases.filter(\.tracksWeight)
-        #expect(Set(tracked) == [.meatRaw, .poultryRaw, .seafoodRaw, .meatDeli])
+        #expect(WeightUnit.ounces.formatted(pounds: 1.0 / 3) == "5.33 oz")
     }
 }

@@ -35,6 +35,11 @@ struct OCRServiceTests {
         #expect(rows == ["ORG KALE 2.99", "BANANAS 1.23"])
     }
 
+    @Test func handlesEmptyInput() {
+        #expect(OCRService.rows(from: []).isEmpty)
+        #expect(OCRService.bestCandidate(among: []) == nil)
+    }
+
     @Test func prefersLaterCandidateThatKeepsTheWeight() {
         #expect(OCRService.bestCandidate(among: ["Qty: @$6.99/lb", "Qty: 1.98lb @$6.99/lb"]) == "Qty: 1.98lb @$6.99/lb")
     }

@@ -42,6 +42,27 @@ struct FoodShelfLifeTests {
         #expect(FoodShelfLife.shared.days(for: name, category: category) == days)
     }
 
+    @Test(arguments: [
+        ("Cherries", 2 as Int?),
+        ("Peaches", 3),
+        ("Carrots", 14),
+        ("Organic Baby Carrots", 28),
+        ("Peanut Butter", nil),
+        ("", nil),
+    ])
+    func matchesPluralsAndWholeWordsOnly(_ name: String, days: Int?) {
+        let table = FoodShelfLife(groups: [
+            .init(categories: ["other"], foods: ["cherry": 2, "peach": 3, "carrot": 14, "baby carrot": 28, "pea": 3]),
+        ])
+        #expect(table.days(for: name, category: .other) == days)
+    }
+
+    @Test func onlyMatchesFoodsInTheItemsCategory() {
+        let table = FoodShelfLife(groups: [.init(categories: ["produce_other"], foods: ["onion": 60])])
+        #expect(table.days(for: "Onion", category: .produceOther) == 60)
+        #expect(table.days(for: "Onion", category: .condiments) == nil)
+    }
+
     @Test func tieGoesToShorterShelfLife() {
         let table = FoodShelfLife(groups: [.init(categories: ["other"], foods: ["kale": 5, "leek": 9])])
         #expect(table.days(for: "Kale and Leek Mix", category: .other) == 5)

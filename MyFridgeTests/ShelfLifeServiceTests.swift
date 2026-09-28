@@ -26,4 +26,8 @@ struct ShelfLifeServiceTests {
         let service = ShelfLifeService(daysByCategory: ["eggs": 28, "other": 9])
         #expect(service.days(for: .dairyMilk) == 9)
     }
+
+    @Test func missingOtherFallsBackToAWeek() {
+        #expect(ShelfLifeService(daysByCategory: [:]).days(for: .dairyMilk) == 7)
+    }
 }

@@ -3,21 +3,10 @@ import Testing
 @testable import MyFridge
 
 struct ExpiryCalculatorTests {
-    let calendar: Calendar = {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = TimeZone(identifier: "America/New_York")!
-        return calendar
-    }()
+    let shelfLife = ShelfLifeService(daysByCategory: ["dairy_milk": 7, "poultry_raw": 2, "eggs": 28, "other": 7])
 
     var calculator: ExpiryCalculator {
-        ExpiryCalculator(
-            shelfLife: ShelfLifeService(daysByCategory: ["dairy_milk": 7, "poultry_raw": 2, "eggs": 28, "other": 7]),
-            calendar: calendar
-        )
-    }
-
-    func date(_ year: Int, _ month: Int, _ day: Int, hour: Int = 0, minute: Int = 0) -> Date {
-        calendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute))!
+        .testing(shelfLife: shelfLife)
     }
 
     @Test func addsShelfLifeDays() {
@@ -63,7 +52,7 @@ struct ExpiryCalculatorTests {
     ])
     func statusThresholds(daysLeft: Int, expected: ExpiryStatus) {
         let now = date(2026, 9, 23, hour: 12)
-        let expiry = calendar.date(byAdding: .day, value: daysLeft, to: date(2026, 9, 23))!
+        let expiry = testCalendar.date(byAdding: .day, value: daysLeft, to: date(2026, 9, 23))!
         #expect(calculator.status(for: expiry, now: now) == expected)
     }
 
@@ -85,23 +74,27 @@ struct ExpiryCalculatorTests {
     }
 
     @Test(arguments: [
-        (-3, "Expired 3 days ago"),
+        (-30, "Expired 30 days ago"),
+        (-2, "Expired 2 days ago"),
         (-1, "Expired yesterday"),
         (0, "Expires today"),
         (1, "Expires tomorrow"),
         (2, "2 days left"),
+        (30, "30 days left"),
     ])
     func relativeText(daysLeft: Int, expected: String) {
         let now = date(2026, 9, 23, hour: 12)
-        let expiry = calendar.date(byAdding: .day, value: daysLeft, to: date(2026, 9, 23))!
+        let expiry = testCalendar.date(byAdding: .day, value: daysLeft, to: date(2026, 9, 23))!
         #expect(calculator.relativeText(for: expiry, now: now) == expected)
     }
 
     @Test func memoryBeatsFoodTableBeatsCategory() async {
         await withTemporaryMemory { memory in
-            var calculator = self.calculator
-            calculator.foods = FoodShelfLife(groups: [.init(categories: ["other"], foods: ["onion": 60])])
-            calculator.memory = memory
+            let calculator = ExpiryCalculator.testing(
+                shelfLife: shelfLife,
+                foods: FoodShelfLife(groups: [.init(categories: ["other"], foods: ["onion": 60])]),
+                memory: memory
+            )
             #expect(calculator.days(for: .other, named: "Garlic") == 7)
             #expect(calculator.days(for: .other, named: "Red Onion") == 60)
             memory.remember(45, for: "Red Onion")
@@ -112,8 +105,7 @@ struct ExpiryCalculatorTests {
 
     @Test func remembersDaysFromPurchaseToExpiry() async {
         await withTemporaryMemory { memory in
-            var calculator = self.calculator
-            calculator.memory = memory
+            let calculator = ExpiryCalculator.testing(shelfLife: shelfLife, memory: memory)
             var draft = DraftItem(name: "Organic Milk", category: .dairyMilk, addedDate: date(2026, 9, 21), calculator: calculator)
             draft.expiryDate = date(2026, 11, 11)
             calculator.remember(draft)
@@ -139,7 +131,6 @@ struct ExpiryCalculatorTests {
         ("Organic Whole Milk", .dairyMilkUltra, 2026, 11, 16),
     ])
     func matchesPackageDates(name: String, category: FoodCategory, year: Int, month: Int, day: Int) {
-        let calculator = ExpiryCalculator(memory: ShelfLifeMemory(suiteName: "MyFridgeTests.empty"), calendar: calendar)
-        #expect(calculator.expiry(for: category, named: name, addedOn: date(2026, 9, 28)) == date(year, month, day))
+        #expect(ExpiryCalculator.testing().expiry(for: category, named: name, addedOn: date(2026, 9, 28)) == date(year, month, day))
     }
 }

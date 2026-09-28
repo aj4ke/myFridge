@@ -85,6 +85,11 @@ struct ReceiptLineFilterTests {
         #expect(lines == ["365 ORG PASTA PENNE 1.99 F | 2 @ 1.29", "ORG KALE 2.99"])
     }
 
+    @Test func joinsWeightLineAcrossDroppedPriceAndTareLines() {
+        let lines = ReceiptLineFilter.filter(["ORG BANANAS", "1.78 F", "TARE WEIGHT 0.01 lb", "2.30 lb @ 0.79 /lb", "ORG KALE 2.99"])
+        #expect(lines == ["ORG BANANAS | 2.30 lb @ 0.79 /lb", "ORG KALE 2.99"])
+    }
+
     @Test func trimsWhitespaceAndKeepsOrder() {
         #expect(ReceiptLineFilter.filter(["  ORG KALE 2.99 ", "TOTAL 2.99", "BANANAS 1.23"]) == ["ORG KALE 2.99", "BANANAS 1.23"])
     }
@@ -132,13 +137,15 @@ struct ReceiptLineFilterTests {
         #expect(items == ["Genji Sushi, Spicy Shrimp Tempura Crunch Roll, 8.96 Ounce | Qty: 1 @ $12.99 each"])
     }
 
-    @Test func itemWithoutQtyEndsAtItsPrice() {
+    @Test func itemsWithoutQtyEndAtTheirPrice() {
         let items = ReceiptLineFilter.screenshotItems(from: [
             ["365 by Whole Foods Market, Organic", "Chicken Noodle Soup, 18.6 Ounce"],
             ["$3.99"],
+            ["Organic Strawberries, 1 lb"],
+            ["$4.99"],
             ["8"],
         ])
-        #expect(items == ["365 by Whole Foods Market, Organic Chicken Noodle Soup, 18.6 Ounce"])
+        #expect(items == ["365 by Whole Foods Market, Organic Chicken Noodle Soup, 18.6 Ounce", "Organic Strawberries, 1 lb"])
     }
 
     @Test func dropsItemsWhoseNameIsJunk() {
@@ -154,6 +161,16 @@ struct ReceiptLineFilterTests {
         #expect(items == ["Organic Red Onion | Qty: 0.88 lb @$2.99/lb"])
     }
 
+    @Test func dropsQtyCutOffFromItemAboveTheScreenshot() {
+        let items = ReceiptLineFilter.screenshotItems(from: [
+            ["Qty: 1 @ $3.99 each"],
+            ["$3.99"],
+            ["Organic Whole Milk, 64 oz"],
+            ["Qty: 1 @ $4.39 each"],
+        ])
+        #expect(items == ["Organic Whole Milk, 64 oz | Qty: 1 @ $4.39 each"])
+    }
+
     @Test func keepsItemCutOffBeforeItsQty() {
         let items = ReceiptLineFilter.screenshotItems(from: [
             ["Pineapple Chunks Small"],
@@ -162,6 +179,11 @@ struct ReceiptLineFilterTests {
             ["Organic Strawberries, 1 lb"],
         ])
         #expect(items == ["Pineapple Chunks Small | Qty: 0.69 lb @$5.49/lb", "Organic Strawberries, 1 lb"])
+    }
+
+    @Test func emptyInputGivesNothing() {
+        #expect(ReceiptLineFilter.filter([]).isEmpty)
+        #expect(ReceiptLineFilter.screenshotItems(from: []).isEmpty)
     }
 
     @Test func pagesWithoutQtyOrPricesKeepOneEntryPerParagraph() {

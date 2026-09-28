@@ -56,25 +56,36 @@ final class ImportService {
     }
 
     func makeDrafts(addedOn date: Date) -> [DraftItem] {
-        lastItems.map { item in
+        Self.drafts(from: lastItems, lines: lastFilteredLines, source: lastSource ?? .receipt, addedOn: date)
+    }
+
+    static func drafts(
+        from items: [ParsedItem],
+        lines: [String],
+        source: ItemSource,
+        addedOn date: Date,
+        calculator: ExpiryCalculator = ExpiryCalculator()
+    ) -> [DraftItem] {
+        items.map { item in
             DraftItem(
                 name: item.name,
                 category: item.category,
                 quantity: item.quantity,
-                weight: weight(for: item),
+                weight: weight(for: item, in: lines),
                 addedDate: date,
-                source: lastSource ?? .receipt,
-                needsRefrigeration: item.needsRefrigeration
+                source: source,
+                needsRefrigeration: item.needsRefrigeration,
+                calculator: calculator
             )
         }
     }
 
-    func weight(for item: ParsedItem) -> (pounds: Double, unit: WeightUnit)? {
-        guard lastFilteredLines.indices.contains(item.line - 1) else { return nil }
-        return WeightExtractor.weight(in: lastFilteredLines[item.line - 1])
+    static func weight(for item: ParsedItem, in lines: [String]) -> (pounds: Double, unit: WeightUnit)? {
+        guard lines.indices.contains(item.line - 1) else { return nil }
+        return WeightExtractor.weight(in: lines[item.line - 1])
     }
 
-    /** The model can report available and still fail, so errors fall back too. */
+    /** The model can report available and still failc, so errors fall back too. */
     private func parseFilteredLines() async throws {
         progress = "Sorting items…"
         let source = lastSource ?? .receipt

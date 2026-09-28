@@ -23,8 +23,26 @@ struct ItemParserTests {
 
     @Test func promptNumbersLinesAcrossTheWholeImport() {
         let prompt = FoundationModelsParser.prompt(for: 40..<42, of: lines, source: .receipt)
-        #expect(prompt.hasPrefix("Source: a paper grocery receipt."))
         #expect(prompt.hasSuffix("[41] Line 41\n[42] Line 42"))
+    }
+
+    @Test(arguments: [
+        (ItemSource.receipt, "Source: a paper grocery receipt."),
+        (.screenshot, "Source: text from an Amazon order page screenshot."),
+        (.manual, "\n\n[1] Line 1"),
+    ])
+    func promptStartsWithSourceHint(source: ItemSource, prefix: String) {
+        #expect(FoundationModelsParser.prompt(for: 0..<1, of: lines, source: source).hasPrefix(prefix))
+    }
+
+    @Test func emptyImportSendsNoRequests() async throws {
+        var requests = 0
+        let result = try await FoundationModelsParser.parse(lines: []) { _ in
+            requests += 1
+            return []
+        }
+        #expect(requests == 0)
+        #expect(result.items.isEmpty)
     }
 
     @Test func sendsFortyLinesPerRequest() async throws {
@@ -37,12 +55,13 @@ struct ItemParserTests {
         #expect(result.items.map(\.line) == Array(1...95))
     }
 
-    @Test func splitsChunksThatOverflowTheContextWindow() async throws {
+    @Test(arguments: overflowErrors)
+    func splitsChunksThatOverflowTheContextWindow(_ overflow: any Error) async throws {
         var requests: [Range<Int>] = []
         let result = try await FoundationModelsParser.parse(lines: lines) { range in
             requests.append(range)
             if range.count > 10 {
-                throw LanguageModelSession.GenerationError.exceededContextWindowSize(.init(debugDescription: "too long"))
+                throw overflow
             }
             return items(for: range)
         }
@@ -51,10 +70,23 @@ struct ItemParserTests {
         #expect(requests.filter { $0.count <= 10 }.map(\.count).reduce(0, +) == 95)
     }
 
-    @Test func skipsAndReportsChunksTheModelDeclines() async throws {
+    @Test(arguments: overflowErrors)
+    func skipsALineThatOverflowsOnItsOwn(_ overflow: any Error) async throws {
+        let result = try await FoundationModelsParser.parse(lines: lines) { range in
+            if range.contains(50) {
+                throw overflow
+            }
+            return items(for: range)
+        }
+        #expect(result.skippedLines == ["Line 51"])
+        #expect(result.items.map(\.line) == Array(1...50) + Array(52...95))
+    }
+
+    @Test(arguments: declinedErrors)
+    func skipsAndReportsChunksTheModelDeclines(_ declined: any Error) async throws {
         let result = try await FoundationModelsParser.parse(lines: lines) { range in
             if range.contains(45) {
-                throw LanguageModelSession.GenerationError.guardrailViolation(.init(debugDescription: "declined"))
+                throw declined
             }
             return items(for: range)
         }
@@ -74,7 +106,9 @@ struct ItemParserTests {
         ("Whole Milk", "365 ORG WHL MILK 4.39 F", .dairyMilkUltra),
         ("Half & Half", "Organic Valley Ultra Pasteurized Half & Half, 1 pint", .dairyMilkUltra),
         ("Lactose Free Whole Milk", "Lactaid Lactose Free Whole Milk, 96 oz", .dairyMilkUltra),
+        ("Fairlife 2% Milk", "Fairlife 2% Reduced Fat Milk, 52 fl oz", .dairyMilkUltra),
         ("Clover Sonoma Whole Milk", "Clover Sonoma Whole Milk, Half Gallon", .dairyMilk),
+        ("Whole Milk", "GEORGIA DAIRY WHOLE MILK", .dairyMilk),
     ])
     func picksOutUltraPasteurizedMilk(name: String, line: String, expected: FoodCategory) {
         let item = ParsedItem(line: 1, name: name, category: .dairyMilk, quantity: 1, needsRefrigeration: true)
@@ -84,6 +118,12 @@ struct ItemParserTests {
     @Test func leavesOtherOrganicFoodAlone() {
         let onion = ParsedItem(line: 1, name: "Organic Red Onion", category: .produceOther, quantity: 1, needsRefrigeration: true)
         #expect(FoundationModelsParser.refined(onion, line: "Organic Red Onion").category == .produceOther)
+    }
+
+    @Test func eachUnavailableReasonHasItsOwnMessage() {
+        let reasons: [SystemLanguageModel.Availability.UnavailableReason] = [.deviceNotEligible, .appleIntelligenceNotEnabled, .modelNotReady]
+        let messages = reasons.compactMap { FoundationModelsParser.ParserError.unavailable($0).errorDescription }
+        #expect(Set(messages).count == reasons.count)
     }
 
     @Test(
@@ -120,4 +160,27 @@ private nonisolated let isSimulator: Bool = {
     #else
     false
     #endif
+}()
+
+/** iOS 26 and 27 throw different error types, so the chunking tests run with each. */
+private nonisolated let overflowErrors: [any Error] = {
+    var errors: [any Error] = [LanguageModelSession.GenerationError.exceededContextWindowSize(.init(debugDescription: "too long"))]
+    if #available(iOS 27.0, *) {
+        errors.append(LanguageModelError.contextSizeExceeded(.init(contextSize: 4096, tokenCount: 5000, debugDescription: "too long")))
+    }
+    return errors
+}()
+
+private nonisolated let declinedErrors: [any Error] = {
+    var errors: [any Error] = [
+        LanguageModelSession.GenerationError.guardrailViolation(.init(debugDescription: "declined")),
+        LanguageModelSession.GenerationError.refusal(.init(transcriptEntries: []), .init(debugDescription: "declined")),
+    ]
+    if #available(iOS 27.0, *) {
+        errors += [
+            LanguageModelError.guardrailViolation(.init(debugDescription: "declined")),
+            LanguageModelError.refusal(.init(explanation: "declined", debugDescription: "declined")),
+        ]
+    }
+    return errors
 }()
