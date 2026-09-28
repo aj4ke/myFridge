@@ -1,17 +1,9 @@
-# macOS
 .DS_Store
-
-# Xcode per-user state (window layout, breakpoints, scheme order)
 xcuserdata/
 *.xcuserstate
-
-# Build output
 build/
 DerivedData/
 *.xcresult
 *.ipa
 *.dSYM
 *.dSYM.zip
-
-# Claude Code local settings
-.claude/settings.local.json
