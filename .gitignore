@@ -7,3 +7,6 @@ DerivedData/
 *.ipa
 *.dSYM
 *.dSYM.zip
+.claude/
+AGENTS.md
+CLAUDE.md
