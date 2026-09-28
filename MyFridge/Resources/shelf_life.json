@@ -1,0 +1,8 @@
+{
+  "dairy_milk": 7, "dairy_milk_ultra": 49, "dairy_yogurt": 14, "cheese_hard": 28, "cheese_soft": 7,
+  "eggs": 28, "meat_raw": 3, "poultry_raw": 2, "seafood_raw": 2,
+  "meat_deli": 5, "produce_leafy": 5, "produce_berries": 4,
+  "produce_other": 7, "fruit_whole": 14, "herbs": 7, "tofu_tempeh": 5,
+  "prepared_meals": 4, "leftovers": 4, "condiments": 60,
+  "beverages": 10, "other": 7
+}

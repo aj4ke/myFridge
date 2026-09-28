@@ -1,0 +1,79 @@
+[
+  {
+    "categories": ["produce_leafy", "produce_berries", "produce_other", "fruit_whole", "herbs"],
+    "foods": {
+      "asparagus": 3, "bamboo shoot": 14, "green bean": 3, "wax bean": 3, "fava bean": 3, "lima bean": 3,
+      "snap pea": 3, "snow pea": 3, "sugar snap": 3, "edamame": 4, "bok choy": 2, "broccoli": 3, "rapini": 3,
+      "brussels sprout": 3, "carrot": 14, "baby carrot": 28, "parsnip": 14, "cauliflower": 3, "corn": 1,
+      "cucumber": 4, "ginger": 14, "iceberg": 7, "romaine": 7, "chard": 7, "radicchio": 14, "okra": 2,
+      "onion": 60, "green onion": 7, "spring onion": 7, "scallion": 7, "pumpkin": 90, "radish": 10,
+      "rutabaga": 14, "summer squash": 4, "yellow squash": 4, "butternut": 30, "acorn squash": 30,
+      "winter squash": 30, "delicata": 30, "kabocha": 30, "taro": 2, "cherry tomato": 5, "turnip": 14,
+      "yuca": 3, "cassava": 3, "jicama": 14, "kimchi": 180, "chipotle pepper": 417, "burrito wrap": 33,
+      "cilantro": 14, "mint": 14, "oregano": 14, "rosemary": 14, "chive": 14, "thyme": 14, "basil": 10,
+      "parsley": 2,
+      "apple": 28, "apricot": 2, "avocado": 3, "banana": 3, "cherry": 2, "lychee": 7, "gooseberry": 7,
+      "blueberry": 7, "strawberry": 2, "raspberry": 2, "cranberry": 60, "date": 365, "grape": 7, "guava": 2,
+      "kiwi": 3, "kiwifruit": 3, "watermelon": 3, "honeydew": 3, "papaya": 7, "mango": 7, "passion fruit": 7,
+      "feijoa": 7, "peach": 3, "nectarine": 3, "plums": 3, "pear": 3, "prickly pear": 7, "pineapple": 5,
+      "plantain": 3, "pomegranate": 30, "kumquat": 21, "star fruit": 7, "yuzu": 5, "cherimoya": 4
+    }
+  },
+  {
+    "categories": ["dairy_milk", "dairy_milk_ultra", "dairy_yogurt", "cheese_hard", "cheese_soft", "eggs"],
+    "foods": {
+      "butter": 30, "margarine": 180, "ghee": 365, "cream cheese": 14, "whipped cream cheese": 14,
+      "cottage cheese": 14, "ricotta": 14, "cheese curd": 14, "string cheese": 150, "shredded": 125,
+      "kefir": 7, "eggnog": 3, "hard boiled": 7, "egg white": 7, "liquid egg": 7, "whipped cream": 21,
+      "creamer": 21, "dip": 14
+    }
+  },
+  {
+    "categories": ["meat_raw", "poultry_raw", "seafood_raw"],
+    "foods": {
+      "ground": 1, "ground beef": 13, "chicken thigh": 16, "liver": 1, "bacon": 78, "uncured bacon": 4, "turkey bacon": 14, "canadian bacon": 14,
+      "hot dog": 14, "frank": 14, "frankfurter": 14, "sausage": 1, "smoked sausage": 7, "cooked sausage": 7,
+      "kielbasa": 7, "bratwurst": 2, "chorizo": 1, "pepperoni": 14, "salami": 14, "ham": 7, "spiral": 3,
+      "corned beef": 5, "cooked": 3, "rotisserie": 3, "smoked salmon": 14, "lox": 14, "caviar": 7
+    }
+  },
+  {
+    "categories": ["meat_deli", "prepared_meals", "leftovers"],
+    "foods": {
+      "salami": 14, "pepperoni": 14, "hot dog": 14, "frank": 14, "frankfurter": 14, "smoked salmon": 14,
+      "lox": 14, "bacon": 78, "canadian bacon": 14, "guacamole": 3, "fresh salsa": 4, "pico de gallo": 4
+    }
+  },
+  {
+    "categories": ["condiments"],
+    "foods": {
+      "barbecue": 120, "bbq": 120, "chutney": 30, "horseradish": 90, "jam": 180, "jelly": 180,
+      "preserves": 180, "ketchup": 180, "cocktail sauce": 180, "chili sauce": 180, "marinade": 180,
+      "mustard": 365, "olives": 14, "pickle": 30, "dressing": 30, "vinaigrette": 28, "salsa": 30,
+      "fresh salsa": 4, "pico de gallo": 4, "guacamole": 3, "marinara": 4, "pasta sauce": 4,
+      "spaghetti sauce": 4, "tomato sauce": 3, "pizza sauce": 3, "tomato paste": 5, "soy sauce": 30,
+      "teriyaki": 30, "tahini": 21, "hoisin": 90, "oyster sauce": 90, "black bean sauce": 90, "relish": 270,
+      "cranberry sauce": 7, "broth": 3, "stock": 3, "curry paste": 5, "kimchi": 180, "miso": 365, "dip": 14,
+      "lemon juice": 60, "lime juice": 60, "chipotle pepper": 417, "adobo": 417
+    }
+  },
+  {
+    "categories": ["beverages"],
+    "foods": {
+      "apple cider": 14, "creamer": 21, "lemon juice": 60, "lime juice": 60
+    }
+  },
+  {
+    "categories": ["tofu_tempeh"],
+    "foods": {
+      "tofu": 7, "miso": 365
+    }
+  },
+  {
+    "categories": ["other"],
+    "foods": {
+      "butter": 30, "peanut butter": 90, "margarine": 180, "ghee": 365, "bread": 14, "tortilla": 60,
+      "flour tortilla": 33, "burrito wrap": 33, "brioche": 13, "bun": 13
+    }
+  }
+]
