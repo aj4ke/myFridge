@@ -12,6 +12,12 @@ nonisolated struct FoundationModelsParser: ItemParser {
         Each input line starts with a number in square brackets; copy it into line. Keep brand names spelled as written. \
         A line may end with " | " and a quantity: "Qty: 2" or "2 @ 1.29" means quantity 2, and a weight such as \
         "0.88 lb" means quantity 1.
+        Storage is where the product is kept at home before it's opened:
+        freezer for food sold frozen, such as waffles, frozen pizza, ice cream and frozen vegetables.
+        pantry for shelf-stable food, such as bread, buns, tortillas, pasta, rice, canned or boxed soup, \
+        canned peppers such as chipotles, jarred sauce, chips and cereal.
+        fridge for fresh meat, fish, milk, cheese, butter, eggs, cut fruit and ready-to-eat meals.
+        notFood for household goods such as paper towels, soap and trash bags.
         """
 
     enum ParserError: LocalizedError {
@@ -47,14 +53,21 @@ nonisolated struct FoundationModelsParser: ItemParser {
         return result
     }
 
-    /** The model files all milk under Milk. Organic, UHT, ultra and lactose-free usually mean ultra-pasteurized. */
+    /**
+     * The model files all milk under Milk. Organic, UHT, ultra and lactose-free usually mean ultra-pasteurized.
+     * It also files waffles as bread, so words for food that's sold frozen send it to the freezer.
+     */
     static func refined(_ item: ParsedItem, line: String) -> ParsedItem {
-        let longLifePattern = #"\b(ORG|ORGANIC|ULTRA|UHT|LACTOSE[- ]?FREE|LACTAID|FAIRLIFE)\b"#
-        guard item.category == .dairyMilk,
-              (item.name + " " + line).range(of: longLifePattern, options: [.regularExpression, .caseInsensitive]) != nil
-        else { return item }
         var item = item
-        item.category = .dairyMilkUltra
+        let text = item.name + " " + line
+        let longLifePattern = #"\b(ORG|ORGANIC|ULTRA|UHT|LACTOSE[- ]?FREE|LACTAID|FAIRLIFE)\b"#
+        if item.category == .dairyMilk, text.range(of: longLifePattern, options: [.regularExpression, .caseInsensitive]) != nil {
+            item.category = .dairyMilkUltra
+        }
+        let frozenPattern = #"\b(FROZEN|WAFFLES?(?!\s+(MIX|CONES?))|ICE CREAM|POPSICLES?|SORBET|GELATO)\b"#
+        if item.storage != .notFood, text.range(of: frozenPattern, options: [.regularExpression, .caseInsensitive]) != nil {
+            item.storage = .freezer
+        }
         return item
     }
 

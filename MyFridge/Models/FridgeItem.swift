@@ -15,6 +15,9 @@ final class FridgeItem {
     var subcategory: String?
     var weightPounds: Double?
     var weightUnitRaw: String?
+    var locationRaw: String?
+    var frozenDate: Date?
+    var thawedDate: Date?
 
     var category: FoodCategory {
         get { FoodCategory(rawValue: categoryRaw) ?? .other }
@@ -31,6 +34,12 @@ final class FridgeItem {
         set { sourceRaw = newValue.rawValue }
     }
 
+    /** Items saved before pantry and freezer existed have no location and are in the fridge. */
+    var location: StorageLocation {
+        get { locationRaw.flatMap(StorageLocation.init(rawValue:)) ?? .fridge }
+        set { locationRaw = newValue.rawValue }
+    }
+
     init(
         name: String,
         category: FoodCategory,
@@ -40,6 +49,9 @@ final class FridgeItem {
         weightUnit: WeightUnit = .pounds,
         addedDate: Date = .now,
         expiryDate: Date,
+        location: StorageLocation = .fridge,
+        frozenDate: Date? = nil,
+        thawedDate: Date? = nil,
         source: ItemSource = .manual,
         notes: String? = nil
     ) {
@@ -52,6 +64,9 @@ final class FridgeItem {
         self.weightUnitRaw = weightUnit.rawValue
         self.addedDate = addedDate
         self.expiryDate = expiryDate
+        self.locationRaw = location.rawValue
+        self.frozenDate = frozenDate
+        self.thawedDate = thawedDate
         self.sourceRaw = source.rawValue
         self.notes = notes
     }

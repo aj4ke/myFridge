@@ -1,0 +1,14 @@
+[
+  {
+    "categories": ["meat_raw", "poultry_raw", "seafood_raw"],
+    "foods": {
+      "ground": 1, "stew": 1, "sausage": 1, "liver": 1, "nugget": 1
+    }
+  },
+  {
+    "categories": ["frozen_meals", "frozen_produce"],
+    "foods": {
+      "nugget": 1, "polenta": 5, "edamame": 7
+    }
+  }
+]

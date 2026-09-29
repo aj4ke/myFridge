@@ -1,4 +1,5 @@
 import Foundation
+import FoundationModels
 import Testing
 import UIKit
 @testable import MyFridge
@@ -49,6 +50,46 @@ struct FixtureTests {
         #expect(items.count == 8)
         #expect(weighed.map(\.name) == ["Bell & Evans, Boneless Skinless Chicken Thighs"])
         #expect(weighed.map(\.pounds) == [1.98])
+    }
+
+    /** The whole screenshot import on a real iPhone: OCR, the on-device model, then where each item lands. */
+    @Test(
+        .enabled(if: SystemLanguageModel.default.isAvailable),
+        .disabled(if: isSimulator, "The simulator reports the model as available but has no model assets"),
+        .timeLimit(.minutes(2))
+    )
+    func onDeviceImportPlacesScreenshotItems() async throws {
+        let images = try ["amazon_screenshot1", "amazon_screenshot2"].map { name in
+            let url = try #require(imageURL(name))
+            return try #require(UIImage(contentsOfFile: url.path))
+        }
+        let lines = ReceiptLineFilter.screenshotItems(from: try await OCRService.recognizeParagraphs(in: images))
+        let items = try await FoundationModelsParser().parse(lines: lines, source: .screenshot).items
+        print(items.map { "MODEL-OUTPUT \($0.line) | \($0.name) | \($0.category) | \($0.storage)" }.joined(separator: "\n"))
+        func drafts(_ modes: StorageModes) -> [DraftItem] {
+            ImportService.drafts(from: items, lines: lines, source: .screenshot, addedOn: .now, modes: modes, calculator: .testing())
+        }
+        let allOn = drafts(StorageModes(pantry: true, freezer: true))
+        let freezerOff = drafts(StorageModes(pantry: true))
+        func index(_ keyword: String) throws -> Int {
+            try #require(items.firstIndex { lines[$0.line - 1].localizedCaseInsensitiveContains(keyword) }, "No item for \(keyword)")
+        }
+
+        #expect(allOn[try index("Paper Towel")].skipReason == .notFood)
+        for keyword in ["Shredded Cheese", "Salted Butter", "Organic Whole Milk", "Ground Beef", "Pork Bacon", "Chicken Thighs"] {
+            #expect(allOn[try index(keyword)].location == .fridge, "\(keyword)")
+            #expect(allOn[try index(keyword)].skipReason == nil, "\(keyword)")
+        }
+        for keyword in ["Brioche", "Burrito Wraps"] {
+            #expect(allOn[try index(keyword)].location == .pantry, "\(keyword)")
+        }
+        let chipotles = try index("Chipotle Peppers")
+        withKnownIssue("The model files canned chipotles as fresh produce. In the fridge they still get their 417-day date.", isIntermittent: true) {
+            #expect(allOn[chipotles].location == .pantry)
+        }
+        #expect(allOn[try index("Protein Waffles")].location == .freezer)
+        #expect(freezerOff[try index("Protein Waffles")].skipReason == .locationOff(.freezer))
+        #expect(allOn[try index("Chicken Thighs")].weightPounds == 1.98)
     }
 
     /** Otherwise the parameterized tests above would silently run zero cases. */

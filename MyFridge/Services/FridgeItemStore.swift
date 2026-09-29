@@ -9,7 +9,7 @@ enum FridgeItemStore {
         }
         let item = FridgeItem(draft)
         context.insert(item)
-        Task { await NotificationService.shared.schedule(for: item) }
+        Task { await ExpiryAlerts.schedule(for: item) }
     }
 
     static func update(_ item: FridgeItem, with draft: DraftItem, calculator: ExpiryCalculator = ExpiryCalculator()) {
@@ -18,7 +18,24 @@ enum FridgeItemStore {
         }
         item.apply(draft)
         NotificationService.shared.cancel(for: item)
-        Task { await NotificationService.shared.schedule(for: item) }
+        Task { await ExpiryAlerts.schedule(for: item) }
+    }
+
+    static func freeze(_ item: FridgeItem, on date: Date = .now, calculator: ExpiryCalculator = ExpiryCalculator()) {
+        var draft = DraftItem(item, calculator: calculator)
+        draft.freeze(on: date, calculator: calculator)
+        update(item, with: draft, calculator: calculator)
+    }
+
+    static func thaw(
+        _ item: FridgeItem,
+        on date: Date = .now,
+        modes: StorageModes = .current,
+        calculator: ExpiryCalculator = ExpiryCalculator()
+    ) {
+        var draft = DraftItem(item, calculator: calculator)
+        draft.thaw(on: date, modes: modes, calculator: calculator)
+        update(item, with: draft, calculator: calculator)
     }
 
     static func addImported(_ drafts: [DraftItem], to context: ModelContext, calculator: ExpiryCalculator = ExpiryCalculator()) async throws {
@@ -30,6 +47,15 @@ enum FridgeItemStore {
         }
         try context.save()
         let items = try context.fetch(FetchDescriptor<FridgeItem>())
-        await NotificationService.shared.rescheduleAll(items: items)
+        await ExpiryAlerts.rescheduleAll(items: StorageModes.current.visible(items))
+    }
+
+    /** Includes items hidden in turned-off locations. */
+    static func deleteAll(from context: ModelContext) throws {
+        for item in try context.fetch(FetchDescriptor<FridgeItem>()) {
+            ExpiryAlerts.cancel(for: item)
+            context.delete(item)
+        }
+        try context.save()
     }
 }

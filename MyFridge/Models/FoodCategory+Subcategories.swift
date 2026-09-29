@@ -33,6 +33,14 @@ nonisolated extension FoodCategory {
         case .leftovers: []
         case .condiments: ["Ketchup", "Mustard", "Mayo", "Salsa", "Hot Sauce", "Salad Dressing", "Jam", "Pickles", "Hummus"]
         case .beverages: ["Juice", "Soda", "Sparkling Water", "Beer", "Wine", "Kombucha", "Cold Brew"]
+        case .breadBakery: ["Sandwich Bread", "Bagels", "Tortillas", "Buns & Rolls", "English Muffins", "Pita", "Muffins", "Pastries"]
+        case .grainsPasta: ["Pasta", "Rice", "Quinoa", "Oats", "Noodles", "Couscous", "Dried Beans", "Lentils"]
+        case .cannedGoods: ["Soup", "Beans", "Tomatoes", "Tuna", "Vegetables", "Fruit", "Broth", "Pasta Sauce"]
+        case .snacksCereal: ["Cereal", "Granola", "Chips", "Crackers", "Pretzels", "Popcorn", "Nuts", "Cookies", "Snack Bars", "Dried Fruit"]
+        case .bakingSpices: ["Flour", "Sugar", "Spices", "Oil", "Baking Soda", "Baking Powder", "Yeast", "Vanilla", "Honey", "Syrup"]
+        case .frozenMeals: ["Pizza", "Waffles", "Fries", "Dinners", "Burritos", "Nuggets", "Dumplings", "Breakfast Sandwiches"]
+        case .frozenProduce: ["Mixed Vegetables", "Peas", "Corn", "Broccoli", "Spinach", "Berries", "Mango", "Edamame"]
+        case .frozenDesserts: ["Ice Cream", "Sorbet", "Popsicles", "Frozen Yogurt", "Ice Cream Bars"]
         case .other: []
         }
     }

@@ -9,6 +9,9 @@ MyFridge is an iPhone app that tracks what's in your fridge by expiration date. 
 - Learns from past expiration corrections
 - Weight tracking for meat, poultry, and seafood
 - Notifications for expiring food
+- Optional MyFridge list in Reminders that follows every add, edit, freeze and delete
+- Optional Pantry and Freezer modes, turned on in Settings
+- Freeze and thaw items, with freezer and thawed dates from USDA FoodKeeper
 
 ## Technologies
 

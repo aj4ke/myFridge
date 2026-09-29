@@ -4,17 +4,28 @@ struct ItemFormView: View {
     @Environment(\.dismiss) private var dismiss
 
     let title: String
+    let isSaved: Bool
     let onSave: (DraftItem) -> Void
 
     @State private var draft: DraftItem
     @State private var subcategoryChoice: SubcategoryChoice
     @State private var customSubcategory: String
     @State private var weightText: String
+    @State private var beforeFrozenToggle: DraftItem?
     private let hadWeight: Bool
 
-    /** State(initialValue:) only seeds @State on the first init. SwiftUI ignores it after that. */
-    init(title: String, draft: DraftItem, onSave: @escaping (DraftItem) -> Void) {
+    @AppStorage(StorageModes.pantryKey) private var pantryEnabled = false
+    @AppStorage(StorageModes.freezerKey) private var freezerEnabled = false
+
+    private let calculator = ExpiryCalculator()
+
+    /**
+     * State(initialValue:) only seeds @State on the first init. SwiftUI ignores it after that.
+     * isSaved means the item is already in storage, so un-freezing it is a thaw.
+     */
+    init(title: String, draft: DraftItem, isSaved: Bool = false, onSave: @escaping (DraftItem) -> Void) {
         self.title = title
+        self.isSaved = isSaved
         self.onSave = onSave
         _draft = State(initialValue: draft)
         if let subcategory = draft.subcategory, !draft.category.subcategories.contains(subcategory) {
@@ -55,6 +66,34 @@ struct ItemFormView: View {
         return draft.weightUnit.toPounds(value)
     }
 
+    private var modes: StorageModes {
+        StorageModes(pantry: pantryEnabled, freezer: freezerEnabled)
+    }
+
+    private var isFrozen: Bool {
+        draft.location == .freezer
+    }
+
+    private var showsStoredIn: Bool {
+        modes.pantry && !isFrozen && draft.category.allowedLocations.contains(.pantry)
+    }
+
+    private var categories: [FoodCategory] {
+        FoodCategory.allCases.filter { modes.isEnabled($0.defaultLocation) || $0 == draft.category }
+    }
+
+    /** The expiry check only applies when the item was frozen in this form, since that's when its fridge expiry is known. */
+    private var freezeWarnings: [String] {
+        guard isFrozen else { return [] }
+        let before = beforeFrozenToggle.flatMap { $0.location == .freezer ? nil : $0.expiryDate }
+        return calculator.freezeWarnings(
+            for: draft.category,
+            named: draft.name,
+            expiringOn: before,
+            frozenOn: draft.frozenDate ?? draft.addedDate
+        )
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -74,7 +113,7 @@ struct ItemFormView: View {
                             }
                         )
                     ) {
-                        ForEach(FoodCategory.allCases, id: \.self) { category in
+                        ForEach(categories, id: \.self) { category in
                             Label(category.displayName, systemImage: category.symbolName)
                                 .tag(category)
                         }
@@ -112,7 +151,56 @@ struct ItemFormView: View {
                 }
 
                 Section {
-                    DatePicker("Added", selection: $draft.addedDate, displayedComponents: .date)
+                    if showsStoredIn {
+                        Picker(
+                            "Stored in",
+                            selection: Binding(
+                                get: { draft.location },
+                                set: {
+                                    draft.location = $0
+                                    draft.expiryEdited = false
+                                    draft.recalculateExpiry()
+                                }
+                            )
+                        ) {
+                            ForEach([StorageLocation.fridge, .pantry], id: \.self) { location in
+                                Label(location.displayName, systemImage: location.symbolName)
+                                    .tag(location)
+                            }
+                        }
+                    }
+
+                    Toggle(isOn: Binding(get: { isFrozen }, set: setFrozen)) {
+                        Label("Frozen", systemImage: StorageLocation.freezer.symbolName)
+                    }
+                    .disabled(!modes.freezer)
+
+                    if isFrozen {
+                        DatePicker(
+                            "Frozen on",
+                            selection: Binding(
+                                get: { draft.frozenDate ?? draft.addedDate },
+                                set: { draft.frozenDate = $0 }
+                            ),
+                            in: draft.addedDate...max(draft.addedDate, .now),
+                            displayedComponents: .date
+                        )
+                    }
+                } footer: {
+                    if !modes.freezer {
+                        Text("Turn on Freezer in Settings to freeze items.")
+                    } else if !freezeWarnings.isEmpty {
+                        Text(freezeWarnings.joined(separator: " "))
+                            .foregroundStyle(.orange)
+                    }
+                }
+
+                Section {
+                    DatePicker(
+                        "Added",
+                        selection: Binding(get: { draft.addedDate }, set: { draft.setAddedDate($0) }),
+                        displayedComponents: .date
+                    )
 
                     DatePicker(
                         "Expires",
@@ -144,10 +232,45 @@ struct ItemFormView: View {
             }
             .onChange(of: draft.category) {
                 draft.expiryEdited = false
+                moveToCategoryLocation()
                 draft.recalculateExpiry()
             }
-            .onChange(of: draft.addedDate) { draft.recalculateExpiry() }
+            .onChange(of: draft.frozenDate) { draft.recalculateExpiry() }
             .onChange(of: draft.name) { draft.recalculateExpiry() }
+        }
+    }
+
+    /** Toggling back returns to how the item was before the first toggle. Otherwise a saved item thaws today. */
+    private func setFrozen(_ frozen: Bool) {
+        if let before = beforeFrozenToggle, (before.location == .freezer) == frozen {
+            draft.location = before.location
+            draft.frozenDate = before.frozenDate
+            draft.thawedDate = before.thawedDate
+            draft.expiryDate = before.expiryDate
+            draft.expiryEdited = before.expiryEdited
+            draft.recalculateExpiry()
+            beforeFrozenToggle = nil
+            return
+        }
+        beforeFrozenToggle = draft
+        if frozen {
+            draft.freeze(on: isSaved ? .now : draft.addedDate)
+        } else if isSaved {
+            draft.thaw(on: .now, modes: modes)
+        } else {
+            draft.unfreeze(modes: modes)
+        }
+    }
+
+    /** New items follow their category into the pantry or freezer. Saved items only move when the category can't stay put. */
+    private func moveToCategoryLocation() {
+        let category = draft.category
+        if !isSaved && !isFrozen && category.defaultLocation == .freezer && modes.freezer {
+            setFrozen(true)
+        } else if !isSaved && draft.location == .fridge && category.defaultLocation == .pantry && modes.pantry {
+            draft.location = .pantry
+        } else if !category.allowedLocations.contains(draft.location) {
+            draft.location = .fridge
         }
     }
 
@@ -159,6 +282,7 @@ struct ItemFormView: View {
         saved.weightPounds = weightPounds
         saved.addedDate = calendar.startOfDay(for: draft.addedDate)
         saved.expiryDate = calendar.startOfDay(for: draft.expiryDate)
+        saved.frozenDate = draft.frozenDate.map { calendar.startOfDay(for: $0) }
         onSave(saved)
         dismiss()
     }

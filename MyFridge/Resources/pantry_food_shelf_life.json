@@ -1,0 +1,75 @@
+[
+  {
+    "categories": ["produce_other", "fruit_whole", "herbs"],
+    "foods": {
+      "potato": 30, "sweet potato": 14, "yam": 14, "onion": 30, "green onion": 3, "spring onion": 3, "scallion": 3,
+      "garlic": 30, "ginger": 2, "winter squash": 14, "butternut": 14, "acorn squash": 14, "spaghetti squash": 60,
+      "pumpkin": 60, "jicama": 120, "rutabaga": 7, "taro": 7, "yuca": 7, "cassava": 7, "cherry tomato": 10, "tomato": 3,
+      "banana": 3, "avocado": 3,
+      "artichoke": 1, "beet": 1, "eggplant": 1, "okra": 1, "summer squash": 1, "yellow squash": 1, "zucchini": 1,
+      "apple": 21, "orange": 10, "lemon": 10, "lime": 10, "grapefruit": 10, "tangerine": 10, "clementine": 10,
+      "mandarin": 10, "cantaloupe": 2, "honeydew": 2, "watermelon": 1, "grape": 1, "papaya": 3, "mango": 3,
+      "passion fruit": 3, "pomegranate": 2, "prickly pear": 2, "star fruit": 7, "dragon fruit": 2, "coconut": 7,
+      "date": 60, "basil": 5, "cilantro": 7, "mint": 7, "oregano": 7, "rosemary": 7, "thyme": 7, "chive": 7
+    }
+  },
+  {
+    "categories": ["bread_bakery", "grains_pasta", "other"],
+    "foods": {
+      "bread": 14, "roll": 14, "bun": 14, "pita": 14, "flatbread": 14, "naan": 14, "tortilla": 90,
+      "flour tortilla": 90, "burrito wrap": 90, "corn tortilla": 25, "muffin": 3, "cake": 3, "cupcake": 3,
+      "cookie": 60, "donut": 1, "doughnut": 1, "pie": 1, "danish": 5, "pasta": 730, "spaghetti": 730, "penne": 730,
+      "macaroni": 730, "noodle": 730, "rice": 730, "brown rice": 365, "wild rice": 730, "quinoa": 730, "oat": 120,
+      "oatmeal": 360, "barley": 180, "bulgur": 180, "farro": 180, "lentil": 365, "bean": 365, "split pea": 365,
+      "grits": 360, "peanut butter": 180, "almond butter": 365, "cashew butter": 90, "honey": 730, "cereal": 180,
+      "cracker": 240
+    }
+  },
+  {
+    "categories": ["canned_goods", "other"],
+    "foods": {
+      "soup": 730, "chili": 730, "stew": 730, "bean": 730, "refried bean": 1095, "tuna": 1095, "sardine": 365,
+      "corn": 730, "green bean": 730, "tomato": 360, "fruit": 360, "pineapple": 360, "peach": 360,
+      "applesauce": 360, "pasta sauce": 540, "spaghetti sauce": 540, "marinara": 540, "tomato paste": 810,
+      "coconut milk": 730, "coconut cream": 730, "evaporated milk": 360, "condensed milk": 360,
+      "cranberry sauce": 730, "gravy": 730, "broth": 730, "stock": 730
+    }
+  },
+  {
+    "categories": ["snacks_cereal", "other"],
+    "foods": {
+      "cereal": 180, "granola": 180, "granola bar": 180, "cereal bar": 180, "cracker": 240, "graham cracker": 180,
+      "animal cracker": 180, "pretzel": 120, "chip": 60, "popcorn": 60, "microwave popcorn": 180, "cookie": 60,
+      "nut": 365, "almond": 120, "cashew": 14, "walnut": 14, "pecan": 14, "pistachio": 21, "macadamia": 14,
+      "peanut": 28, "pine nut": 14, "jerky": 360, "pork rind": 120, "dried fruit": 180, "raisin": 180,
+      "dried cranberry": 180, "dried mango": 180, "fruit snack": 180, "gummy": 180, "marshmallow": 365,
+      "toaster pastry": 180, "pop tart": 180, "sunflower seed": 360, "pumpkin seed": 180, "chia seed": 540
+    }
+  },
+  {
+    "categories": ["baking_spices", "condiments", "other"],
+    "foods": {
+      "flour": 180, "whole wheat flour": 90, "sugar": 730, "baking soda": 730, "baking powder": 180, "yeast": 730,
+      "cornstarch": 540, "cornmeal": 180, "vanilla": 730, "extract": 730, "spice": 730, "cinnamon": 1095,
+      "black pepper": 730, "garlic powder": 1095, "onion powder": 1095, "cumin": 1095, "chili powder": 730,
+      "paprika": 730, "seasoning": 365, "oregano": 365, "basil": 365, "thyme": 365, "rosemary": 365, "oil": 180,
+      "olive oil": 180, "vegetable oil": 180, "canola oil": 365, "coconut oil": 1095, "sesame oil": 730,
+      "avocado oil": 730, "cooking spray": 730, "shortening": 365, "chocolate": 365, "cake mix": 360,
+      "brownie mix": 360, "pancake mix": 270, "biscuit mix": 270, "breadcrumb": 180, "gelatin": 300,
+      "powdered milk": 1095, "honey": 730, "maple syrup": 365, "syrup": 365, "molasses": 365, "corn syrup": 1095,
+      "vinegar": 730, "balsamic": 1095, "mayo": 90, "mayonnaise": 90, "ketchup": 365, "mustard": 365,
+      "barbecue": 365, "bbq": 365, "hot sauce": 180, "soy sauce": 1095, "teriyaki": 1095, "worcestershire": 365,
+      "jam": 180, "jelly": 180, "preserves": 180, "salsa": 365, "pickle": 365, "olive": 360, "relish": 900,
+      "dressing": 180, "vinaigrette": 180, "hoisin": 540, "oyster sauce": 540, "tahini": 365, "chutney": 365,
+      "marinade": 365, "curry paste": 730, "pasta sauce": 540, "marinara": 540, "peanut butter": 180
+    }
+  },
+  {
+    "categories": ["beverages"],
+    "foods": {
+      "juice": 21, "coffee": 90, "instant coffee": 365, "tea": 540, "wine": 365, "red wine": 1095,
+      "coconut water": 360, "lemon juice": 360, "lime juice": 360, "vegetable juice": 540, "apple cider": 2,
+      "nectar": 360, "drink mix": 540
+    }
+  }
+]

@@ -19,6 +19,21 @@ struct ShelfLifeMemoryTests {
         }
     }
 
+    @Test func keepsEachLocationSeparately() async {
+        await withTemporaryMemory { memory in
+            memory.remember(7, for: "Milk")
+            memory.remember(90, for: "Milk", in: .freezer)
+            #expect(memory.days(for: "Milk") == 7)
+            #expect(memory.days(for: "Milk", in: .freezer) == 90)
+            #expect(memory.days(for: "Milk", in: .pantry) == nil)
+        }
+    }
+
+    /** Values learned before pantry and freezer existed are stored under this key. */
+    @Test func fridgeKeepsTheOriginalKey() {
+        #expect(ShelfLifeMemory.storageKey(for: .fridge) == "learnedShelfLife")
+    }
+
     @Test func keepsEachNameSeparately() async {
         await withTemporaryMemory { memory in
             memory.remember(50, for: "Milk")

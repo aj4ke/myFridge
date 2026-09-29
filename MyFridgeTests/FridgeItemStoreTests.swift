@@ -81,6 +81,38 @@ struct FridgeItemStoreTests {
         }
     }
 
+    @Test func deleteAllIncludesEveryLocation() throws {
+        let container = try inMemoryContainer()
+        let context = container.mainContext
+        for location in StorageLocation.allCases {
+            context.insert(FridgeItem(name: location.displayName, category: .other, addedDate: added, expiryDate: days(7), location: location))
+        }
+
+        try FridgeItemStore.deleteAll(from: context)
+
+        #expect(try context.fetch(FetchDescriptor<FridgeItem>()).isEmpty)
+    }
+
+    @Test func freezeAndThawMoveTheItemWithoutLearning() async {
+        await withTemporaryMemory { memory in
+            let calculator = ExpiryCalculator.testing(memory: memory)
+            let item = FridgeItem(name: "Ribeye Steak", category: .meatRaw, addedDate: added, expiryDate: days(3))
+
+            FridgeItemStore.freeze(item, on: days(2), calculator: calculator)
+            #expect(item.location == .freezer)
+            #expect(item.frozenDate == days(2))
+            #expect(item.expiryDate == days(122))
+
+            FridgeItemStore.thaw(item, on: days(60), modes: StorageModes(freezer: true), calculator: calculator)
+            #expect(item.location == .fridge)
+            #expect(item.frozenDate == nil)
+            #expect(item.thawedDate == days(60))
+            #expect(item.expiryDate == days(63))
+            #expect(memory.days(for: "Ribeye Steak") == nil)
+            #expect(memory.days(for: "Ribeye Steak", in: .freezer) == nil)
+        }
+    }
+
     @Test func updateRemembersOnlyChangedExpiry() async {
         await withTemporaryMemory { memory in
             let calculator = ExpiryCalculator.testing(memory: memory)

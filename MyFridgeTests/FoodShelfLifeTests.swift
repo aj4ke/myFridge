@@ -2,16 +2,18 @@ import Testing
 @testable import MyFridge
 
 struct FoodShelfLifeTests {
+    let bundledGroups = FoodShelfLife.shared.groupsByLocation.values.flatMap { $0 } + FoodShelfLife.shared.thawedGroups
+
     @Test func bundledGroupsUseRealCategories() {
-        for group in FoodShelfLife.shared.groups {
+        for group in bundledGroups {
             for category in group.categories {
-                #expect(FoodCategory(rawValue: category) != nil, "food_shelf_life.json has unknown category \(category)")
+                #expect(FoodCategory(rawValue: category) != nil, "food table has unknown category \(category)")
             }
         }
     }
 
     @Test func bundledFoodsAreNormalizedAndPositive() {
-        for (food, days) in FoodShelfLife.shared.groups.flatMap(\.foods) {
+        for (food, days) in bundledGroups.flatMap(\.foods) {
             #expect(FoodShelfLife.normalized(food) == food, "\(food) should be plain lowercase words")
             #expect(days > 0, "\(food) should be positive")
         }
@@ -66,6 +68,53 @@ struct FoodShelfLifeTests {
     @Test func tieGoesToShorterShelfLife() {
         let table = FoodShelfLife(groups: [.init(categories: ["other"], foods: ["kale": 5, "leek": 9])])
         #expect(table.days(for: "Kale and Leek Mix", category: .other) == 5)
+    }
+
+    @Test(arguments: [
+        ("Russet Potatoes", FoodCategory.produceOther, StorageLocation.pantry, 30 as Int?),
+        ("Green Onions", .produceOther, .pantry, 3),
+        ("Sandwich Bread", .breadBakery, .pantry, 14),
+        ("Flour Tortillas", .breadBakery, .pantry, 90),
+        ("Corn Tortillas", .grainsPasta, .pantry, 25),
+        ("Extra Virgin Olive Oil", .bakingSpices, .pantry, 180),
+        ("80/20 Ground Beef", .meatRaw, .freezer, 90),
+        ("Whole Chicken", .poultryRaw, .freezer, 360),
+        ("Atlantic Salmon", .seafoodRaw, .freezer, 60),
+        ("Wild Cod Fillets", .seafoodRaw, .freezer, 180),
+        ("Crinkle Cut French Fries", .frozenMeals, .freezer, 360),
+        ("Frozen Waffles", .frozenMeals, .freezer, 90),
+        ("Sandwich Bread", .breadBakery, .freezer, 90),
+        ("Ground Beef", .meatRaw, .fridge, 13),
+    ])
+    func findsFoodInEachLocation(_ name: String, category: FoodCategory, location: StorageLocation, days: Int?) {
+        #expect(FoodShelfLife.shared.days(for: name, category: category, in: location) == days)
+    }
+
+    @Test func thawedTableCoversGroundMeat() {
+        #expect(FoodShelfLife.shared.thawedDays(for: "80/20 Ground Beef", category: .meatRaw) == 1)
+        #expect(FoodShelfLife.shared.thawedDays(for: "Ribeye Steak", category: .meatRaw) == nil)
+    }
+
+    @Test func onlyMatchesFoodsInTheItemsLocation() {
+        let table = FoodShelfLife(groupsByLocation: [.pantry: [.init(categories: ["produce_other"], foods: ["onion": 30])]])
+        #expect(table.days(for: "Onion", category: .produceOther, in: .pantry) == 30)
+        #expect(table.days(for: "Onion", category: .produceOther) == nil)
+    }
+
+    @Test(arguments: [
+        ("Romaine Hearts", FoodCategory.produceLeafy, true),
+        ("Organic Spring Mix", .produceLeafy, true),
+        ("English Cucumber", .produceOther, true),
+        ("Chicken Salad", .preparedMeals, true),
+        ("Large Brown Eggs", .eggs, true),
+        ("Hard-Boiled Eggs", .eggs, true),
+        ("Liquid Egg Whites", .eggs, false),
+        ("Baby Spinach", .produceLeafy, false),
+        ("Chicken Thighs", .poultryRaw, false),
+        ("Mayo", .condiments, true),
+    ])
+    func flagsFoodsThatFreezePoorly(_ name: String, category: FoodCategory, expected: Bool) {
+        #expect(FoodShelfLife.freezesPoorly(category, named: name) == expected)
     }
 
     @Test func normalizesNames() {

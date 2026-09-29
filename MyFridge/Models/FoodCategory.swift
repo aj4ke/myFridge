@@ -24,6 +24,14 @@ nonisolated enum FoodCategory: String, CaseIterable {
     case leftovers
     case condiments
     case beverages
+    case breadBakery = "bread_bakery"
+    case grainsPasta = "grains_pasta"
+    case cannedGoods = "canned_goods"
+    case snacksCereal = "snacks_cereal"
+    case bakingSpices = "baking_spices"
+    case frozenMeals = "frozen_meals"
+    case frozenProduce = "frozen_produce"
+    case frozenDesserts = "frozen_desserts"
     case other
 
     var displayName: String {
@@ -48,6 +56,14 @@ nonisolated enum FoodCategory: String, CaseIterable {
         case .leftovers: "Leftovers"
         case .condiments: "Condiments"
         case .beverages: "Beverages"
+        case .breadBakery: "Bread & Bakery"
+        case .grainsPasta: "Grains & Pasta"
+        case .cannedGoods: "Canned & Jarred"
+        case .snacksCereal: "Snacks & Cereal"
+        case .bakingSpices: "Baking & Spices"
+        case .frozenMeals: "Frozen Meals"
+        case .frozenProduce: "Frozen Fruit & Veg"
+        case .frozenDesserts: "Ice Cream & Desserts"
         case .other: "Other"
         }
     }
@@ -81,7 +97,39 @@ nonisolated enum FoodCategory: String, CaseIterable {
         case .leftovers: "microwave.fill"
         case .condiments: "flask.fill"
         case .beverages: "waterbottle.fill"
+        case .breadBakery: "birthday.cake.fill"
+        case .grainsPasta: "bag.fill"
+        case .cannedGoods: "cylinder.fill"
+        case .snacksCereal: "popcorn.fill"
+        case .bakingSpices: "oven.fill"
+        case .frozenMeals: "thermometer.snowflake"
+        case .frozenProduce: "snowflake.circle.fill"
+        case .frozenDesserts: "cone.fill"
         case .other: "refrigerator.fill"
         }
+    }
+
+    var defaultLocation: StorageLocation {
+        switch self {
+        case .breadBakery, .grainsPasta, .cannedGoods, .snacksCereal, .bakingSpices: .pantry
+        case .frozenMeals, .frozenProduce, .frozenDesserts: .freezer
+        default: .fridge
+        }
+    }
+
+    /** Perishables can't go in the pantry. Frozen foods only reach the fridge by thawing. */
+    var allowedLocations: [StorageLocation] {
+        switch self {
+        case .dairyMilk, .dairyYogurt, .cheeseHard, .cheeseSoft, .eggs, .meatRaw, .poultryRaw, .seafoodRaw, .meatDeli,
+             .produceLeafy, .produceBerries, .tofuTempeh, .preparedMeals, .leftovers, .frozenMeals, .frozenProduce,
+             .frozenDesserts:
+            [.fridge, .freezer]
+        default:
+            StorageLocation.allCases
+        }
+    }
+
+    func thawDestination(_ modes: StorageModes) -> StorageLocation {
+        defaultLocation == .pantry && modes.pantry ? .pantry : .fridge
     }
 }

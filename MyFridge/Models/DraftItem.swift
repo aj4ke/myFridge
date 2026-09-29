@@ -1,6 +1,12 @@
 import Foundation
 
 nonisolated struct DraftItem: Identifiable {
+    /** Why an import starts unchecked and hidden in the review. */
+    enum SkipReason: Equatable {
+        case notFood
+        case locationOff(StorageLocation)
+    }
+
     let id = UUID()
     var isIncluded: Bool
     var name: String
@@ -12,7 +18,10 @@ nonisolated struct DraftItem: Identifiable {
     var addedDate: Date
     var expiryDate: Date
     var expiryEdited = false
-    var needsRefrigeration: Bool
+    var location: StorageLocation
+    var frozenDate: Date?
+    var thawedDate: Date?
+    var skipReason: SkipReason?
     var source: ItemSource
 
     init(
@@ -21,19 +30,22 @@ nonisolated struct DraftItem: Identifiable {
         quantity: Int = 1,
         weight: (pounds: Double, unit: WeightUnit)? = nil,
         addedDate: Date = Calendar.current.startOfDay(for: .now),
+        location: StorageLocation = .fridge,
         source: ItemSource = .manual,
-        needsRefrigeration: Bool = true,
+        skipReason: SkipReason? = nil,
         calculator: ExpiryCalculator = ExpiryCalculator()
     ) {
-        self.isIncluded = needsRefrigeration
+        self.isIncluded = skipReason == nil
         self.name = name
         self.category = category
         self.quantity = quantity
         self.weightPounds = weight?.pounds
         self.weightUnit = weight?.unit ?? .pounds
         self.addedDate = addedDate
-        self.expiryDate = calculator.expiry(for: category, named: name, addedOn: addedDate)
-        self.needsRefrigeration = needsRefrigeration
+        self.location = location
+        self.frozenDate = location == .freezer ? addedDate : nil
+        self.expiryDate = calculator.expiry(for: category, named: name, in: location, addedOn: addedDate)
+        self.skipReason = skipReason
         self.source = source
     }
 
@@ -49,18 +61,49 @@ nonisolated struct DraftItem: Identifiable {
         self.weightUnit = item.weightUnit
         self.addedDate = item.addedDate
         self.expiryDate = item.expiryDate
-        self.expiryEdited = item.expiryDate != calculator.expiry(for: item.category, named: item.name, addedOn: item.addedDate)
-        self.needsRefrigeration = true
+        self.location = item.location
+        self.frozenDate = item.frozenDate
+        self.thawedDate = item.thawedDate
         self.source = item.source
+        self.expiryEdited = item.expiryDate != calculator.expiry(for: self)
     }
 
     mutating func recalculateExpiry(calculator: ExpiryCalculator = ExpiryCalculator()) {
         guard !expiryEdited else { return }
-        expiryDate = calculator.expiry(for: category, named: name, addedOn: addedDate)
+        expiryDate = calculator.expiry(for: self)
     }
 
+    /** Food bought frozen counts from the purchase date, so its frozen date moves with it. Nothing is frozen before it's bought. */
     mutating func setAddedDate(_ date: Date, calculator: ExpiryCalculator = ExpiryCalculator()) {
+        if let frozenDate, frozenDate == addedDate || frozenDate < date {
+            self.frozenDate = date
+        }
         addedDate = date
+        recalculateExpiry(calculator: calculator)
+    }
+
+    /** Freezer time counts from the day it's frozen, however long it was in the fridge before. */
+    mutating func freeze(on date: Date, calculator: ExpiryCalculator = ExpiryCalculator()) {
+        location = .freezer
+        frozenDate = calculator.calendar.startOfDay(for: date)
+        thawedDate = nil
+        expiryEdited = false
+        recalculateExpiry(calculator: calculator)
+    }
+
+    /** For a new item that was never really frozen, like an import marked frozen by mistake. */
+    mutating func unfreeze(modes: StorageModes, calculator: ExpiryCalculator = ExpiryCalculator()) {
+        location = category.thawDestination(modes)
+        frozenDate = nil
+        expiryEdited = false
+        recalculateExpiry(calculator: calculator)
+    }
+
+    mutating func thaw(on date: Date, modes: StorageModes, calculator: ExpiryCalculator = ExpiryCalculator()) {
+        location = category.thawDestination(modes)
+        frozenDate = nil
+        thawedDate = calculator.calendar.startOfDay(for: date)
+        expiryEdited = false
         recalculateExpiry(calculator: calculator)
     }
 }
@@ -76,6 +119,9 @@ extension FridgeItem {
             weightUnit: draft.weightUnit,
             addedDate: draft.addedDate,
             expiryDate: draft.expiryDate,
+            location: draft.location,
+            frozenDate: draft.frozenDate,
+            thawedDate: draft.thawedDate,
             source: draft.source
         )
     }
@@ -89,5 +135,8 @@ extension FridgeItem {
         weightUnit = draft.weightUnit
         addedDate = draft.addedDate
         expiryDate = draft.expiryDate
+        location = draft.location
+        frozenDate = draft.frozenDate
+        thawedDate = draft.thawedDate
     }
 }

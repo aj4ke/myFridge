@@ -9,7 +9,7 @@ struct ReviewImportView: View {
 
     @State private var drafts: [DraftItem]
     @State private var purchaseDate: Date
-    @State private var showsNonFridgeItems = false
+    @State private var showsSkippedItems = false
     @State private var editingDraft: DraftItem?
 
     init(importService: ImportService) {
@@ -24,7 +24,7 @@ struct ReviewImportView: View {
     }
 
     private var hiddenCount: Int {
-        drafts.count { !$0.needsRefrigeration }
+        drafts.count { $0.skipReason != nil }
     }
 
     var body: some View {
@@ -39,15 +39,11 @@ struct ReviewImportView: View {
 
                 Section {
                     DatePicker("Purchased", selection: $purchaseDate, displayedComponents: .date)
-                } footer: {
-                    if importService.lastPurchaseDate != nil {
-                        Text("Read from the receipt.")
-                    }
                 }
 
                 Section {
                     ForEach($drafts) { $draft in
-                        if showsNonFridgeItems || draft.needsRefrigeration {
+                        if showsSkippedItems || draft.skipReason == nil {
                             DraftRow(draft: $draft) {
                                 editingDraft = draft
                             }
@@ -61,7 +57,7 @@ struct ReviewImportView: View {
                 }
 
                 if hiddenCount > 0 {
-                    Toggle("Show \(hiddenCount) non-fridge items", isOn: $showsNonFridgeItems)
+                    Toggle(hiddenCount == 1 ? "Show 1 other item" : "Show \(hiddenCount) other items", isOn: $showsSkippedItems)
                 }
             }
             .overlay {
@@ -129,10 +125,18 @@ private struct DraftRow: View {
             draft.category.displayName,
             draft.weightPounds.map { draft.weightUnit.formatted(pounds: $0) },
             calculator.relativeText(for: draft.expiryDate),
-            draft.needsRefrigeration ? nil : "Not refrigerated",
+            note,
         ]
         .compactMap { $0 }
         .joined(separator: " · ")
+    }
+
+    private var note: String? {
+        switch draft.skipReason {
+        case .notFood: "Not food"
+        case .locationOff(let location): "\(location.displayName) is off"
+        case nil: draft.location == .fridge ? nil : draft.location.displayName
+        }
     }
 
     var body: some View {

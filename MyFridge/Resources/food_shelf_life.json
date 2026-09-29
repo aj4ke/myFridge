@@ -70,7 +70,7 @@
     }
   },
   {
-    "categories": ["other"],
+    "categories": ["other", "bread_bakery", "grains_pasta"],
     "foods": {
       "butter": 30, "peanut butter": 90, "margarine": 180, "ghee": 365, "bread": 14, "tortilla": 60,
       "flour tortilla": 33, "burrito wrap": 33, "brioche": 13, "bun": 13

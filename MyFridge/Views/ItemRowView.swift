@@ -21,6 +21,12 @@ struct ItemRowView: View {
                         Text("×\(item.quantity)")
                             .foregroundStyle(.secondary)
                     }
+                    if item.location != .fridge {
+                        Image(systemName: item.location.symbolName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .accessibilityLabel(item.location.displayName)
+                    }
                 }
                 HStack(spacing: 4) {
                     Text(calculator.relativeText(for: item.expiryDate, now: now))
@@ -38,7 +44,9 @@ struct ItemRowView: View {
 
     private var details: String? {
         let weight = item.weightPounds.map { item.weightUnit.formatted(pounds: $0) }
-        let parts = [item.subcategory, weight].compactMap { $0 }
+        let frozen = item.frozenDate.map { "Frozen \($0.formatted(.dateTime.month(.abbreviated).day()))" }
+        let thawed = item.thawedDate == nil ? nil : "Thawed"
+        let parts = [frozen, thawed, item.subcategory, weight].compactMap { $0 }
         return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }

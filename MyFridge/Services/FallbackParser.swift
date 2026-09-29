@@ -7,9 +7,9 @@ nonisolated struct FallbackParser: ItemParser {
             ParsedItem(
                 line: index + 1,
                 name: line.components(separatedBy: " | ").first ?? line,
+                storage: .fridge,
                 category: .other,
-                quantity: 1,
-                needsRefrigeration: true
+                quantity: 1
             )
         })
     }

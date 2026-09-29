@@ -64,20 +64,47 @@ final class ImportService {
         lines: [String],
         source: ItemSource,
         addedOn date: Date,
+        modes: StorageModes = .current,
         calculator: ExpiryCalculator = ExpiryCalculator()
     ) -> [DraftItem] {
         items.map { item in
-            DraftItem(
+            let placement = placement(for: item, modes: modes)
+            return DraftItem(
                 name: item.name,
                 category: item.category,
                 quantity: item.quantity,
                 weight: weight(for: item, in: lines),
                 addedDate: date,
+                location: placement.location,
                 source: source,
-                needsRefrigeration: item.needsRefrigeration,
+                skipReason: placement.skipReason,
                 calculator: calculator
             )
         }
+    }
+
+    /**
+     * Frozen categories go to the freezer whatever storage the model picked.
+     * The model sends lots of produce to the pantry, so produce only goes there if the pantry table lists it.
+     * Food for a turned-off location starts unchecked and goes in the fridge if it's checked anyway.
+     */
+    static func placement(
+        for item: ParsedItem,
+        modes: StorageModes,
+        foods: FoodShelfLife = .shared
+    ) -> (location: StorageLocation, skipReason: DraftItem.SkipReason?) {
+        var suggested: StorageLocation? = item.category.defaultLocation == .freezer ? .freezer : item.storage.location
+        if suggested == .pantry, [.produceOther, .fruitWhole, .herbs].contains(item.category),
+           foods.days(for: item.name, category: item.category, in: .pantry) == nil {
+            suggested = .fridge
+        }
+        guard let suggested else {
+            return (.fridge, .notFood)
+        }
+        guard modes.isEnabled(suggested) else {
+            return (.fridge, .locationOff(suggested))
+        }
+        return (item.category.allowedLocations.contains(suggested) ? suggested : .fridge, nil)
     }
 
     static func weight(for item: ParsedItem, in lines: [String]) -> (pounds: Double, unit: WeightUnit)? {
@@ -107,3 +134,14 @@ final class ImportService {
         lastSkippedLines = result.skippedLines
     }
 }
+
+#if DEBUG
+extension ImportService {
+    /** Opens the review screen in UI tests without OCR or the model. */
+    func loadForUITest(_ items: [ParsedItem]) {
+        lastSource = .screenshot
+        lastItems = items
+        lastFilteredLines = items.map(\.name)
+    }
+}
+#endif

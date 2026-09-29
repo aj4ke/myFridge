@@ -14,12 +14,18 @@ struct FridgeItemTests {
         #expect(item.weightUnit == .pounds)
         item.weightUnitRaw = nil
         #expect(item.weightUnit == .pounds)
+        item.locationRaw = "garage"
+        #expect(item.location == .fridge)
+        item.locationRaw = nil
+        #expect(item.location == .fridge)
     }
 
     @Test func settersStoreRawValues() {
         item.category = .eggs
         item.source = .receipt
         item.weightUnit = .ounces
+        item.location = .freezer
+        #expect(item.locationRaw == "freezer")
         #expect(item.categoryRaw == "eggs")
         #expect(item.sourceRaw == "receipt")
         #expect(item.weightUnitRaw == "oz")
@@ -29,5 +35,6 @@ struct FridgeItemTests {
     @Test func storedRawValuesDontChange() {
         #expect(ItemSource.allCases.map(\.rawValue) == ["receipt", "screenshot", "manual"])
         #expect(WeightUnit.allCases.map(\.rawValue) == ["lb", "oz"])
+        #expect(StorageLocation.allCases.map(\.rawValue) == ["fridge", "pantry", "freezer"])
     }
 }

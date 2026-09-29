@@ -103,6 +103,23 @@ struct ExpiryCalculatorTests {
         }
     }
 
+    @Test func eachLocationHasItsOwnMemory() async {
+        await withTemporaryMemory { memory in
+            let calculator = ExpiryCalculator.testing(
+                shelfLife: ShelfLifeService(daysByLocation: [.fridge: ["other": 7], .pantry: ["other": 30]]),
+                foods: FoodShelfLife(groupsByLocation: [.pantry: [.init(categories: ["other"], foods: ["onion": 60])]]),
+                memory: memory
+            )
+            #expect(calculator.days(for: .other, named: "Red Onion") == 7)
+            #expect(calculator.days(for: .other, named: "Red Onion", in: .pantry) == 60)
+            #expect(calculator.days(for: .other, named: "Garlic", in: .pantry) == 30)
+            memory.remember(45, for: "Red Onion", in: .pantry)
+            #expect(calculator.days(for: .other, named: "Red Onion", in: .pantry) == 45)
+            #expect(calculator.days(for: .other, named: "Red Onion") == 7)
+            #expect(calculator.expiry(for: .other, named: "Red Onion", in: .pantry, addedOn: date(2026, 9, 10)) == date(2026, 10, 25))
+        }
+    }
+
     @Test func remembersDaysFromPurchaseToExpiry() async {
         await withTemporaryMemory { memory in
             let calculator = ExpiryCalculator.testing(shelfLife: shelfLife, memory: memory)

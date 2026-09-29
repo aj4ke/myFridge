@@ -30,4 +30,43 @@ struct ShelfLifeServiceTests {
     @Test func missingOtherFallsBackToAWeek() {
         #expect(ShelfLifeService(daysByCategory: [:]).days(for: .dairyMilk) == 7)
     }
+
+    @Test(arguments: [StorageLocation.pantry, .freezer])
+    func everyAllowedCategoryHasAValue(in location: StorageLocation) {
+        let table = ShelfLifeService.shared.daysByLocation[location] ?? [:]
+        for category in FoodCategory.allCases where category.allowedLocations.contains(location) {
+            #expect((table[category.rawValue] ?? 0) > 0, "\(location) table is missing \(category.rawValue)")
+        }
+    }
+
+    @Test func bundledStorageTablesHaveNoUnknownKeys() {
+        let service = ShelfLifeService.shared
+        let keys = service.daysByLocation.values.flatMap(\.keys) + Array(service.thawedDaysByCategory.keys)
+        for key in keys {
+            #expect(FoodCategory(rawValue: key) != nil, "unknown category key \(key)")
+        }
+    }
+
+    @Test func pantryTableOnlyHasPantryCategories() {
+        for key in (ShelfLifeService.shared.daysByLocation[.pantry] ?? [:]).keys {
+            #expect(FoodCategory(rawValue: key)?.allowedLocations.contains(.pantry) == true, "\(key) can't go in the pantry")
+        }
+    }
+
+    @Test func eachLocationUsesItsOwnTable() {
+        let service = ShelfLifeService(daysByLocation: [
+            .fridge: ["meat_raw": 3],
+            .freezer: ["meat_raw": 120, "other": 60],
+        ])
+        #expect(service.days(for: .meatRaw) == 3)
+        #expect(service.days(for: .meatRaw, in: .freezer) == 120)
+        #expect(service.days(for: .eggs, in: .freezer) == 60)
+        #expect(service.days(for: .eggs, in: .pantry) == 7)
+    }
+
+    @Test func onlyLimitedCategoriesHaveThawedDays() {
+        let service = ShelfLifeService(daysByLocation: [:], thawedDaysByCategory: ["poultry_raw": 1])
+        #expect(service.thawedDays(for: .poultryRaw) == 1)
+        #expect(service.thawedDays(for: .breadBakery) == nil)
+    }
 }

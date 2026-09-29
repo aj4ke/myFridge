@@ -1,0 +1,9 @@
+{
+  "dairy_milk": 90, "dairy_milk_ultra": 90, "dairy_yogurt": 30, "cheese_hard": 180,
+  "cheese_soft": 180, "eggs": 360, "meat_raw": 120, "poultry_raw": 270, "seafood_raw": 60,
+  "meat_deli": 30, "produce_leafy": 240, "produce_berries": 240, "produce_other": 180,
+  "fruit_whole": 60, "herbs": 30, "tofu_tempeh": 150, "prepared_meals": 60, "leftovers": 60,
+  "condiments": 30, "beverages": 240, "bread_bakery": 90, "grains_pasta": 180, "canned_goods": 60,
+  "snacks_cereal": 90, "baking_spices": 120, "frozen_meals": 90, "frozen_produce": 300,
+  "frozen_desserts": 180, "other": 30
+}

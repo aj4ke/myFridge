@@ -27,7 +27,7 @@ struct DraftItemTests {
     }
 
     @Test func nonFridgeImportsStartUnchecked() {
-        let draft = DraftItem(name: "Soup", addedDate: date(2026, 9, 20), source: .screenshot, needsRefrigeration: false, calculator: calculator)
+        let draft = DraftItem(name: "Soup", addedDate: date(2026, 9, 20), source: .screenshot, skipReason: .notFood, calculator: calculator)
         #expect(!draft.isIncluded)
     }
 
@@ -76,7 +76,7 @@ struct DraftItemTests {
         #expect(draft.expiryDate == date(2026, 9, 22))
         #expect(draft.source == .receipt)
         #expect(draft.isIncluded)
-        #expect(draft.needsRefrigeration)
+        #expect(draft.skipReason == nil)
     }
 
     @Test func nameSetsExpiry() {

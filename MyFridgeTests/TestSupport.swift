@@ -8,6 +8,15 @@ nonisolated let testCalendar: Calendar = {
     return calendar
 }()
 
+/** On-device model tests are off in the simulator, which reports the model as available but has no model assets. */
+nonisolated let isSimulator: Bool = {
+    #if targetEnvironment(simulator)
+    true
+    #else
+    false
+    #endif
+}()
+
 nonisolated func date(_ year: Int, _ month: Int, _ day: Int, hour: Int = 0, minute: Int = 0) -> Date {
     testCalendar.date(from: DateComponents(year: year, month: month, day: day, hour: hour, minute: minute))!
 }

@@ -1,0 +1,81 @@
+[
+  {
+    "categories": ["meat_raw", "poultry_raw", "seafood_raw"],
+    "foods": {
+      "ground": 90, "stew": 120, "liver": 90, "giblet": 90, "bacon": 30, "uncured bacon": 21, "turkey bacon": 60,
+      "canadian bacon": 60, "sausage": 30, "bratwurst": 60, "chorizo": 30, "kielbasa": 30, "hot dog": 30,
+      "frank": 30, "frankfurter": 30, "ham": 30, "fresh ham": 180, "corned beef": 30, "prosciutto": 30,
+      "rabbit": 270, "bison": 180, "kabob": 90, "whole chicken": 360, "whole turkey": 360, "cornish hen": 360,
+      "capon": 360, "duck": 180, "goose": 180, "quail": 180, "pheasant": 180, "nugget": 30, "rotisserie": 120,
+      "fried chicken": 120, "cooked": 30, "cod": 180, "flounder": 180, "haddock": 180, "halibut": 180, "sole": 180,
+      "tilapia": 180, "pollock": 120, "perch": 120, "rockfish": 120, "sea trout": 120, "catfish": 60, "salmon": 60,
+      "tuna": 60, "mackerel": 60, "shrimp": 180, "crayfish": 180, "scallop": 180, "squid": 180, "calamari": 180,
+      "crab": 60, "crab leg": 270, "lobster": 14, "lobster tail": 240, "clam": 60, "mussel": 60, "oyster": 60,
+      "smoked salmon": 180, "lox": 270, "surimi": 270, "imitation crab": 270
+    }
+  },
+  {
+    "categories": ["meat_deli", "prepared_meals", "leftovers"],
+    "foods": {
+      "salami": 30, "pepperoni": 30, "hot dog": 30, "prosciutto": 30, "ham": 30, "turkey": 30,
+      "canadian bacon": 60, "bacon": 30, "guacamole": 90, "rotisserie": 120, "fried chicken": 120, "pizza": 30,
+      "pasta": 30, "rice": 180, "soup": 60, "stew": 60, "vegetable soup": 90, "broth": 60, "quiche": 60,
+      "pate": 30
+    }
+  },
+  {
+    "categories": ["dairy_milk", "dairy_milk_ultra", "dairy_yogurt", "cheese_hard", "cheese_soft", "eggs"],
+    "foods": {
+      "butter": 180, "buttermilk": 90, "shredded": 90, "cheese curd": 120, "half and half": 120, "heavy cream": 90,
+      "light cream": 90, "whipped cream": 30, "eggnog": 180, "egg white": 360, "yolk": 360, "liquid egg": 360,
+      "egg substitute": 360, "margarine": 360, "yogurt": 30
+    }
+  },
+  {
+    "categories": ["produce_leafy", "produce_berries", "produce_other", "fruit_whole", "herbs"],
+    "foods": {
+      "asparagus": 150, "green bean": 240, "wax bean": 240, "snap pea": 240, "snow pea": 240, "sugar snap": 240,
+      "pea": 240, "edamame": 240, "lima bean": 240, "fava bean": 240, "bok choy": 300, "broccoli": 300,
+      "rapini": 300, "brussels sprout": 300, "cabbage": 300, "carrot": 300, "baby carrot": 90, "parsnip": 300,
+      "cauliflower": 300, "celery": 300, "corn": 240, "eggplant": 180, "garlic": 30, "ginger": 180, "collard": 300,
+      "chard": 300, "spinach": 300, "kale": 240, "kohlrabi": 240, "leek": 300, "lemongrass": 180, "mushroom": 300,
+      "okra": 300, "onion": 300, "pepper": 180, "hot pepper": 270, "jalapeno": 270, "chili pepper": 270,
+      "potato": 300, "squash": 300, "zucchini": 300, "butternut": 300, "tomato": 60, "turnip": 240,
+      "rutabaga": 240, "beet": 180, "yuca": 30, "cassava": 30, "tamarind": 365, "parsley": 90, "apple": 240,
+      "banana": 60, "blueberry": 240, "blackberry": 360, "boysenberry": 360, "currant": 360, "raspberry": 240,
+      "strawberry": 240, "cherry": 240, "cranberry": 360, "grape": 30, "cantaloupe": 360, "honeydew": 360,
+      "watermelon": 360, "melon": 30, "mango": 180, "papaya": 180, "passion fruit": 180, "peach": 60,
+      "nectarine": 60, "plum": 60, "pear": 60, "pineapple": 300, "plantain": 300, "pomegranate": 300,
+      "prickly pear": 300, "star fruit": 300, "dragon fruit": 300, "date": 365, "coconut": 365, "lychee": 360,
+      "gooseberry": 360, "cherimoya": 300
+    }
+  },
+  {
+    "categories": ["condiments", "canned_goods"],
+    "foods": {
+      "broth": 60, "stock": 60, "pesto": 30, "tomato paste": 60, "coconut milk": 90, "coconut cream": 90,
+      "anchovy": 60, "bacon grease": 360
+    }
+  },
+  {
+    "categories": ["bread_bakery", "grains_pasta", "snacks_cereal", "baking_spices", "other"],
+    "foods": {
+      "bread": 90, "bagel": 90, "muffin": 60, "english muffin": 90, "cake": 180, "cheesecake": 90, "cookie": 240,
+      "cookie dough": 60, "pie": 30, "pie crust": 60, "puff pastry": 360, "cinnamon roll": 90, "tortilla": 180,
+      "fresh pasta": 60, "rice": 180, "quinoa": 180, "oat": 240, "barley": 360, "cracker": 90, "crouton": 330,
+      "nut": 180, "almond": 300, "cashew": 360, "walnut": 720, "pecan": 720, "peanut": 720, "pistachio": 720,
+      "macadamia": 720, "pine nut": 270, "coconut": 365, "yeast": 180, "flax": 360, "butter": 180,
+      "margarine": 360
+    }
+  },
+  {
+    "categories": ["frozen_meals", "frozen_produce", "frozen_desserts"],
+    "foods": {
+      "pizza": 360, "entree": 360, "dinner": 360, "fry": 360, "french fry": 360, "hash brown": 360,
+      "hashbrown": 360, "tater tot": 360, "waffle": 90, "pancake": 90, "pretzel": 270, "dough": 360,
+      "breaded fish": 540, "fish stick": 540, "shrimp": 360, "lobster tail": 240, "sausage": 30, "nugget": 30,
+      "veggie burger": 360, "polenta": 360, "kugel": 365, "egg substitute": 360, "edamame": 730,
+      "concentrate": 360, "ice cream": 180, "sorbet": 270, "sherbet": 270, "ice pop": 270, "popsicle": 270
+    }
+  }
+]
